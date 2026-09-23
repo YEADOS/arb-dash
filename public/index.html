@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>arbiter control</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%23222'/><rect x='3' y='3' width='4' height='10' fill='%237ba3bd'/><rect x='9' y='3' width='4' height='6' fill='%236fa87f'/></svg>"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <span>ARBITER&nbsp;CONTROL</span>
+      </div>
+      <div class="livebar" id="livebar"></div>
+      <div class="topbar-right">
+        <span class="pulse" id="pulse" title="last refresh"></span>
+        <button class="btn btn-ghost" id="theme-toggle" title="toggle theme">LIGHT</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Shared services</h2>
+          <span class="hint">one instance, reused by every worktree</span>
+        </div>
+        <div id="services"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Worktrees</h2>
+          <div class="panel-actions">
+            <button class="btn" id="btn-prune">PRUNE STALE</button>
+            <button class="btn btn-primary" id="btn-new">+ NEW WORKTREE</button>
+          </div>
+        </div>
+        <div class="table-head">
+          <span>worktree</span>
+          <span>branch</span>
+          <span>git</span>
+          <span>frontend</span>
+          <span class="ta-r">actions</span>
+        </div>
+        <div id="worktrees"></div>
+      </section>
+
+      <section class="panel" id="orphan-panel" hidden>
+        <div class="panel-head">
+          <h2>Orphans</h2>
+          <span class="hint">dev servers on paths that are no longer worktrees</span>
+        </div>
+        <div id="orphans"></div>
+      </section>
+    </main>
+
+    <div class="toasts" id="toasts"></div>
+
+    <!-- create ---------------------------------------------------------- -->
+    <dialog id="dlg-create">
+      <form method="dialog" class="dlg">
+        <h3>New worktree</h3>
+        <label>
+          <span>Branch</span>
+          <input id="f-branch" list="branch-list" placeholder="fix/some-thing" autocomplete="off" />
+          <small id="f-branch-note">A new branch. Type an existing name to check it out instead.</small>
+        </label>
+        <label>
+          <span>Base</span>
+          <input id="f-base" list="base-list" value="origin/main" autocomplete="off" />
+          <small>Fetched from origin first. Ignored if the branch already exists.</small>
+        </label>
+        <label>
+          <span>Directory</span>
+          <input id="f-dir" placeholder="auto" autocomplete="off" />
+          <small id="f-dir-note">~/arbiter-&lt;branch&gt;</small>
+        </label>
+        <label>
+          <span>Dependencies</span>
+          <select id="f-deps">
+            <option value="clone">Clone node_modules from ~/arbiter (fast)</option>
+            <option value="install">pnpm install</option>
+            <option value="none">Skip</option>
+          </select>
+          <small>Clone uses APFS copy-on-write: instant, no extra disk.</small>
+        </label>
+        <datalist id="branch-list"></datalist>
+        <datalist id="base-list"></datalist>
+        <div class="dlg-actions">
+          <button class="btn" value="cancel">CANCEL</button>
+          <button class="btn btn-primary" id="f-create" value="ok">CREATE</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- delete ---------------------------------------------------------- -->
+    <dialog id="dlg-delete">
+      <form method="dialog" class="dlg">
+        <h3>Delete worktree</h3>
+        <p class="dlg-target" id="d-target"></p>
+        <div id="d-warn"></div>
+        <label class="check">
+          <input type="checkbox" id="d-force" />
+          <span>Force removal (discards uncommitted changes)</span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="d-branch" />
+          <span>Also delete the branch <code id="d-branch-name"></code></span>
+        </label>
+        <label id="d-confirm-wrap">
+          <span>Type <code id="d-confirm-name"></code> to confirm</span>
+          <input id="d-confirm" autocomplete="off" />
+        </label>
+        <div class="dlg-actions">
+          <button class="btn" value="cancel">CANCEL</button>
+          <button class="btn btn-danger" id="d-go" value="ok" disabled>DELETE</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
